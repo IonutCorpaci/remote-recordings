@@ -44,6 +44,8 @@ next-env.d.ts
 
 # Agents
 /.agents/
+/.claude/
+/.windsurf/
 
 # SQLite
 prisma/*.db
