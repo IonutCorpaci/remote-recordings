@@ -1,0 +1,90 @@
+"use client";
+
+import * as React from "react";
+import { Car, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/Badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import removeCar from "@/features/cars/actions/removeCar";
+import { useDroppable } from "@dnd-kit/core";
+import { DraggableParticipant } from "./DraggableParticipant";
+import { toast } from "sonner";
+import { CarWithRelations } from "../types";
+
+export function CarCard({ car, isReadOnly = false }: { car: CarWithRelations, isReadOnly?: boolean }) {
+  const [isPending, startTransition] = React.useTransition();
+
+  const { isOver, setNodeRef } = useDroppable({
+    id: car.id,
+    disabled: isReadOnly,
+  });
+
+  const handleRemoveCar = () => {
+    if (!confirm("Удалить машину? Пассажиры автоматически станут 'Не распределены'.")) return;
+    startTransition(async () => {
+      const result = await removeCar(car.id, car.tripId);
+      if (result?.error) toast.error(result.error);
+      else toast.success("Машина удалена");
+    });
+  };
+
+  return (
+              <Card 
+                ref={setNodeRef}
+                className={`border-t-4 border-t-primary shadow-sm hover:shadow-md transition-all relative group/car ${isOver ? 'ring-2 ring-primary bg-primary/5' : ''}`}
+              >
+                <CardHeader className="p-4 pb-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-base flex items-center">
+                        <Car className="w-4 h-4 mr-2 text-primary" />
+                        {car.driver?.name}
+                      </CardTitle>
+                      <p className="text-xs text-muted-foreground mt-1">{car.carModel || "Авто"}</p>
+                    </div>
+                    <div className="flex flex-col items-end space-y-1">
+                      <Badge variant="outline" className="text-xs bg-background/50">
+                        {(car.passengers?.length || 0) + 1} / {car.totalSeats} мест
+                      </Badge>
+                      {!isReadOnly && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="w-6 h-6 text-destructive opacity-0 group-hover/car:opacity-100 transition-opacity disabled:opacity-50"
+                          onClick={handleRemoveCar}
+                          disabled={isPending}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4 pt-2 space-y-2">
+                  {/* Driver slot (fixed) */}
+                  <div className="flex items-center p-2 rounded-lg bg-primary/10 border border-primary/20 cursor-default transition-colors">
+                    <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 text-[10px] text-primary">В</div>
+                    <span className="font-medium text-sm text-primary">{car.driver?.name}</span>
+                  </div>
+
+                  {/* Passenger slots */}
+                  {Array.from({ length: car.totalSeats - 1 }).map((_, i) => {
+                    const passenger = car.passengers?.[i];
+                    return passenger ? (
+                      <DraggableParticipant 
+                        key={passenger.id} 
+                        participant={passenger}
+                        index={i}
+                        isReadOnly={isReadOnly}
+                      />
+                    ) : (
+                      <div key={`empty-${i}`} className="flex items-center p-2 rounded-lg bg-secondary/30 border border-dashed border-white/10 text-muted-foreground text-sm cursor-default transition-colors">
+                        <div className="w-6 h-6 rounded-full bg-background/50 flex items-center justify-center mr-2 text-[10px]">{i + 1}</div>
+                        <span>Свободное место</span>
+                      </div>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+  );
+}
