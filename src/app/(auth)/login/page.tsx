@@ -15,6 +15,9 @@ export default function LoginPage() {
     email: '',
     password: '',
   })
+  
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [isPending, setIsPending] = useState(false);
 
   const router = useRouter();
 
@@ -30,6 +33,8 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsPending(true);
+    setFieldErrors({});
 
     try {
       const response = await fetch('/api/auth/login', {
@@ -40,13 +45,18 @@ export default function LoginPage() {
 
       if (response.ok) {
         toast.success("Вход выполнен успешно");
-        router.push('/');
+        window.location.href = '/';
       } else {
         const errorData = await response.json();
+        if (errorData.fieldErrors) {
+          setFieldErrors(errorData.fieldErrors);
+        }
         toast.error(errorData.error || "Ошибка при входе");
       }
     } catch (error) {
       toast.error("Сетевая ошибка или сервер недоступен");
+    } finally {
+      setIsPending(false);
     }
   }
 
@@ -81,6 +91,9 @@ export default function LoginPage() {
                 Email
               </label>
               <Input id="email" name="email" onChange={handleInput} value={form.email} placeholder="admin@example.com" type="email" />
+              {fieldErrors.email && (
+                <p className="text-sm text-red-500 font-medium">{fieldErrors.email[0]}</p>
+              )}
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -89,11 +102,14 @@ export default function LoginPage() {
                 </label>
               </div>
               <Input id="password" name="password" onChange={handleInput} value={form.password} type="password" placeholder="••••••••" />
+              {fieldErrors.password && (
+                <p className="text-sm text-red-500 font-medium">{fieldErrors.password[0]}</p>
+              )}
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full shadow-lg shadow-primary/20">
-              Войти
+            <Button type="submit" disabled={isPending} className="w-full shadow-lg shadow-primary/20">
+              {isPending ? "Вход..." : "Войти"}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             <div className="text-center text-sm text-muted-foreground">

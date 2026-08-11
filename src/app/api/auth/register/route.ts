@@ -11,7 +11,16 @@ export async function POST(request: Request) {
     try {
 
         const body = await request.json();
-        const { email, password, name } = registerSchema.parse(body)
+        const parsed = registerSchema.safeParse(body);
+        
+        if (!parsed.success) {
+            return NextResponse.json({ 
+                error: "Ошибка валидации", 
+                fieldErrors: parsed.error.flatten().fieldErrors 
+            }, { status: 400 });
+        }
+        
+        const { email, password, name } = parsed.data;
 
         const isExistEmail = await prisma.user.findUnique({
             where: { email: email }
@@ -43,11 +52,6 @@ export async function POST(request: Request) {
 
         // Ваша логика здесь
     } catch (error) {
-        if (error instanceof z.ZodError) {
-            return NextResponse.json({ error: error.issues[0].message }, { status: 400 });
-        }
-
-        // Для всех остальных (неожиданных) серверных ошибок
         console.error("Ошибка при регистрации:", error);
         return NextResponse.json({ error: "Что-то пошло не так" }, { status: 500 });
     }

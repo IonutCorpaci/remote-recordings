@@ -4,6 +4,8 @@ import { requireAuth } from "@/features/auth/utils/requireAuth";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
+import { addCarSchema } from "../validations/carSchema";
+
 export default async function addCar(
     tripId: string, 
     driverId: string | null, 
@@ -12,6 +14,14 @@ export default async function addCar(
     totalSeats: number
 ) {
     await requireAuth();
+
+    const parsed = addCarSchema.safeParse({ carModel, totalSeats });
+    if (!parsed.success) {
+        return {
+            error: "Ошибка валидации",
+            fieldErrors: parsed.error.flatten().fieldErrors
+        };
+    }
 
     try {
         let finalDriverId = driverId;

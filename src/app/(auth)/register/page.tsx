@@ -16,6 +16,9 @@ export default function RegisterPage() {
     email: '',
     password: '',
   })
+  
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [isPending, setIsPending] = useState(false);
 
   const router = useRouter();
 
@@ -31,6 +34,8 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsPending(true);
+    setFieldErrors({});
 
     try {
       const response = await fetch('/api/auth/register', {
@@ -41,13 +46,18 @@ export default function RegisterPage() {
 
       if (response.ok) {
         toast.success("Аккаунт успешно создан");
-        router.push('/');
+        window.location.href = '/';
       } else {
         const errorData = await response.json();
+        if (errorData.fieldErrors) {
+          setFieldErrors(errorData.fieldErrors);
+        }
         toast.error(errorData.error || "Ошибка при регистрации");
       }
     } catch (error) {
       toast.error("Сетевая ошибка или сервер недоступен");
+    } finally {
+      setIsPending(false);
     }
   }
 
@@ -79,23 +89,32 @@ export default function RegisterPage() {
                 Имя
               </label>
               <Input id="name" name="name" onChange={handleInput} value={form.name} placeholder="Иван Иванов" />
+              {fieldErrors.name && (
+                <p className="text-sm text-red-500 font-medium">{fieldErrors.name[0]}</p>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none" htmlFor="email">
                 Email
               </label>
               <Input id="email" name="email" onChange={handleInput} value={form.email} placeholder="admin@example.com" type="email" />
+              {fieldErrors.email && (
+                <p className="text-sm text-red-500 font-medium">{fieldErrors.email[0]}</p>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none" htmlFor="password">
                 Пароль
               </label>
               <Input id="password" name="password" onChange={handleInput} value={form.password} type="password" placeholder="••••••••" />
+              {fieldErrors.password && (
+                <p className="text-sm text-red-500 font-medium">{fieldErrors.password[0]}</p>
+              )}
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button className="w-full shadow-lg shadow-primary/20">
-              Создать аккаунт
+            <Button disabled={isPending} className="w-full shadow-lg shadow-primary/20">
+              {isPending ? "Создание..." : "Создать аккаунт"}
               <UserPlus className="w-4 h-4 ml-2" />
             </Button>
             <div className="text-center text-sm text-muted-foreground">

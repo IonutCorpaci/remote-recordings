@@ -15,10 +15,17 @@ export default async function createTrip(prevState: unknown, formData: FormData)
     const notes = formData.get('notes') as string;
 
     try {
-        const parsed = createUpdateTripSchema.parse({ title, destination, date, notes })
+        const parsed = createUpdateTripSchema.safeParse({ title, destination, date, notes });
+
+        if (!parsed.success) {
+            return {
+                error: "Ошибка валидации",
+                fieldErrors: parsed.error.flatten().fieldErrors
+            };
+        }
 
         await prisma.trip.create({
-            data: parsed,
+            data: parsed.data,
         });
     } catch (error) {
         return {

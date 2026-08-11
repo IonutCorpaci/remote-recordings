@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, MapPin, Share2, Trash2 } from "lucide-react";
+import { ArrowLeft, MapPin, Share2, Trash2, Edit } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import deleteTrip from "@/features/trips/actions/deleteTrip";
 import updateTripStatus from "@/features/trips/actions/updateTripStatus";
@@ -73,15 +73,27 @@ export function TripHeader({ trip, isReadOnly = false }: { trip: TripWithRelatio
             Поделиться ссылкой
           </Button>
           {!isReadOnly && (
-            <Button 
-              variant="destructive" 
-              size="icon" 
-              className="bg-destructive/10 text-destructive hover:bg-destructive/20 border-destructive/20 cursor-pointer transition-colors"
-              onClick={handleDelete}
-              disabled={isPending}
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
+            <>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                asChild
+                className="cursor-pointer transition-colors"
+              >
+                <Link href={`/trips/${trip.id}/edit`}>
+                  <Edit className="w-4 h-4" />
+                </Link>
+              </Button>
+              <Button 
+                variant="destructive" 
+                size="icon" 
+                className="bg-destructive/10 text-destructive hover:bg-destructive/20 border-destructive/20 cursor-pointer transition-colors"
+                onClick={handleDelete}
+                disabled={isPending}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </>
           )}
         </div>
       </div>

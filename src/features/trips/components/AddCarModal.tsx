@@ -14,9 +14,12 @@ export function AddCarModal({ isOpen, onClose, allParticipants, tripId }: { isOp
   const [newDriverName, setNewDriverName] = React.useState("");
   const [carModel, setCarModel] = React.useState("");
   const [totalSeats, setTotalSeats] = React.useState("4");
+  const [fieldErrors, setFieldErrors] = React.useState<Record<string, string[]>>({});
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setFieldErrors({});
+
     if (!driverId && !newDriverName.trim()) {
       toast.error("Укажите водителя!");
       return;
@@ -32,6 +35,9 @@ export function AddCarModal({ isOpen, onClose, allParticipants, tripId }: { isOp
       );
 
       if (result?.error) {
+        if (result.fieldErrors) {
+          setFieldErrors(result.fieldErrors);
+        }
         toast.error(result.error);
       } else {
         setDriverId("");
@@ -97,6 +103,9 @@ export function AddCarModal({ isOpen, onClose, allParticipants, tripId }: { isOp
                 onChange={e => setCarModel(e.target.value)}
                 disabled={isPending}
               />
+              {fieldErrors.carModel && (
+                <p className="text-xs text-red-500 font-medium">{fieldErrors.carModel[0]}</p>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold">Всего мест</label>
@@ -108,12 +117,15 @@ export function AddCarModal({ isOpen, onClose, allParticipants, tripId }: { isOp
                 onChange={e => setTotalSeats(e.target.value)}
                 disabled={isPending}
               />
+              {fieldErrors.totalSeats && (
+                <p className="text-xs text-red-500 font-medium">{fieldErrors.totalSeats[0]}</p>
+              )}
             </div>
           </div>
 
           <div className="pt-4 flex justify-end space-x-2">
             <Button type="button" variant="ghost" onClick={onClose} disabled={isPending} className="cursor-pointer">Отмена</Button>
-            <Button type="submit" disabled={isPending} className="cursor-pointer">Назначить машину</Button>
+            <Button type="submit" disabled={isPending} className="cursor-pointer">{isPending ? "Добавление..." : "Назначить машину"}</Button>
           </div>
         </form>
       </Modal>

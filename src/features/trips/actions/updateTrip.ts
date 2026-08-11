@@ -14,11 +14,18 @@ export default async function updateTrip(id: string, prevState: unknown, formDat
     const notes = formData.get('notes') as string;
 
     try {
-        const parsed = createUpdateTripSchema.parse({ title, destination, date, notes })
+        const parsed = createUpdateTripSchema.safeParse({ title, destination, date, notes });
+
+        if (!parsed.success) {
+            return {
+                error: "Ошибка валидации",
+                fieldErrors: parsed.error.flatten().fieldErrors
+            };
+        }
 
         await prisma.trip.update({
             where: { id },
-            data: parsed,
+            data: parsed.data,
         });
     } catch (error) {
         return {

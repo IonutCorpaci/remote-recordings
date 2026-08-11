@@ -12,7 +12,12 @@ export default async function getTrips() {
             orderBy: {
                 date: 'desc'
             },
-            include: {
+            select: {
+                id: true,
+                title: true,
+                destination: true,
+                status: true,
+                date: true,
                 _count: {
                     select: {
                         cars: true,

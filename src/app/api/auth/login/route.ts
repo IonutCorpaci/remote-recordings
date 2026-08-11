@@ -10,7 +10,17 @@ import { z } from "zod";
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { email, password } = loginSchema.parse(body)
+        const parsed = loginSchema.safeParse(body);
+        
+        if (!parsed.success) {
+            return NextResponse.json({ 
+                error: "Ошибка валидации", 
+                fieldErrors: parsed.error.flatten().fieldErrors 
+            }, { status: 400 });
+        }
+        
+        const { email, password } = parsed.data;
+
         const user = await prisma.user.findUnique({
             where: { email: email }
         })
@@ -37,12 +47,6 @@ export async function POST(request: Request) {
         }, { status: 200 })
 
     } catch (error) {
-
-        if (error instanceof z.ZodError) {
-            return NextResponse.json({ error: error.issues[0].message }, { status: 400 });
-        }
-
         return NextResponse.json({ error: "Что-то пошло не так" }, { status: 500 });
-
     }
 }

@@ -16,6 +16,7 @@ import { Participant } from "../types";
 export function UnassignedList({ unassigned, tripId, isReadOnly = false }: { unassigned: Participant[], tripId: string, isReadOnly?: boolean }) {
   const [isPending, startTransition] = React.useTransition();
   const [newParticipantName, setNewParticipantName] = React.useState("");
+  const [fieldErrors, setFieldErrors] = React.useState<Record<string, string[]>>({});
 
   const { isOver, setNodeRef } = useDroppable({
     id: "unassigned",
@@ -24,11 +25,17 @@ export function UnassignedList({ unassigned, tripId, isReadOnly = false }: { una
 
   const handleAddParticipant = (e: React.FormEvent) => {
     e.preventDefault();
+    setFieldErrors({});
     if (!newParticipantName.trim()) return;
+    
     startTransition(async () => {
       const result = await addParticipant(tripId, newParticipantName.trim());
-      if (result?.error) toast.error(result.error);
-      else {
+      if (result?.error) {
+        if (result.fieldErrors) {
+          setFieldErrors(result.fieldErrors);
+        }
+        toast.error(result.error);
+      } else {
         setNewParticipantName("");
         toast.success("Участник добавлен");
       }
@@ -67,17 +74,22 @@ export function UnassignedList({ unassigned, tripId, isReadOnly = false }: { una
                 />
               ))}
               {!isReadOnly && (
-                <form onSubmit={handleAddParticipant} className="pt-4 px-1 flex space-x-2">
-                  <Input 
-                    value={newParticipantName}
-                    onChange={e => setNewParticipantName(e.target.value)}
-                    disabled={isPending}
-                    placeholder="Добавить участника..." 
-                    className="h-9 text-sm bg-background/80" 
-                  />
-                  <Button type="submit" size="icon" className="w-9 h-9 shrink-0 cursor-pointer" disabled={isPending || !newParticipantName.trim()}>
-                    <Plus className="w-4 h-4" />
-                  </Button>
+                <form onSubmit={handleAddParticipant} className="pt-4 px-1 flex flex-col space-y-2">
+                  <div className="flex space-x-2">
+                    <Input 
+                      value={newParticipantName}
+                      onChange={e => setNewParticipantName(e.target.value)}
+                      disabled={isPending}
+                      placeholder="Добавить участника..." 
+                      className="h-9 text-sm bg-background/80" 
+                    />
+                    <Button type="submit" size="icon" className="w-9 h-9 shrink-0 cursor-pointer" disabled={isPending || !newParticipantName.trim()}>
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  {fieldErrors.name && (
+                    <p className="text-xs text-red-500 font-medium">{fieldErrors.name[0]}</p>
+                  )}
                 </form>
               )}
             </CardContent>
