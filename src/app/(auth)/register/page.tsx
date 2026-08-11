@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
 
@@ -39,14 +40,14 @@ export default function RegisterPage() {
       });
 
       if (response.ok) {
-        router.push('/')
-
+        toast.success("Аккаунт успешно создан");
+        router.push('/');
       } else {
         const errorData = await response.json();
-        console.error("Ошибка от сервера:", errorData.error);
+        toast.error(errorData.error || "Ошибка при регистрации");
       }
     } catch (error) {
-      console.error("Сетевая ошибка:", error);
+      toast.error("Сетевая ошибка или сервер недоступен");
     }
   }
 

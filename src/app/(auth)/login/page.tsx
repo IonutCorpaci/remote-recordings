@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function LoginPage() {
 
@@ -38,14 +39,14 @@ export default function LoginPage() {
       });
 
       if (response.ok) {
-        router.push('/')
-
+        toast.success("Вход выполнен успешно");
+        router.push('/');
       } else {
         const errorData = await response.json();
-        console.error("Ошибка от сервера:", errorData.error);
+        toast.error(errorData.error || "Ошибка при входе");
       }
     } catch (error) {
-      console.error("Сетевая ошибка:", error);
+      toast.error("Сетевая ошибка или сервер недоступен");
     }
   }
 
