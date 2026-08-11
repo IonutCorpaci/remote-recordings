@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import removeCar from "@/features/cars/actions/removeCar";
+import assignParticipant from "@/features/participants/actions/assignParticipant";
 import { useDroppable } from "@dnd-kit/core";
 import { DraggableParticipant } from "./DraggableParticipant";
 import { toast } from "sonner";
@@ -27,6 +28,15 @@ export function CarCard({ car, unassigned, tripId, isReadOnly = false }: { car: 
       const result = await removeCar(car.id, car.tripId);
       if (result?.error) toast.error(result.error);
       else toast.success("Машина удалена");
+    });
+  };
+
+  const handleUnassign = (participantId: string) => {
+    if (!tripId) return;
+    startTransition(async () => {
+      const result = await assignParticipant(participantId, null, tripId);
+      if (result?.error) toast.error(result.error);
+      else toast.success("Пассажир высажен");
     });
   };
 
@@ -53,9 +63,10 @@ export function CarCard({ car, unassigned, tripId, isReadOnly = false }: { car: 
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="w-6 h-6 text-destructive opacity-0 group-hover/car:opacity-100 transition-opacity disabled:opacity-50"
+                          className="w-6 h-6 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50 cursor-pointer"
                           onClick={handleRemoveCar}
                           disabled={isPending}
+                          title="Удалить машину"
                         >
                           <Trash2 className="w-3 h-3" />
                         </Button>
@@ -66,7 +77,7 @@ export function CarCard({ car, unassigned, tripId, isReadOnly = false }: { car: 
                 <CardContent className="p-4 pt-2 space-y-2">
                   {/* Driver slot (fixed) */}
                   <div className="flex items-center p-2 rounded-lg bg-primary/10 border border-primary/20 cursor-default transition-colors">
-                    <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 text-[10px] text-primary">В</div>
+                    <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mr-2 text-[10px] text-primary font-medium">В</div>
                     <span className="font-medium text-sm text-primary">{car.driver?.name}</span>
                   </div>
 
@@ -79,13 +90,15 @@ export function CarCard({ car, unassigned, tripId, isReadOnly = false }: { car: 
                         participant={passenger}
                         index={i}
                         isReadOnly={isReadOnly}
+                        onUnassign={handleUnassign}
+                        isPending={isPending}
                       />
                     ) : (
                       <button 
                         key={`empty-${i}`} 
                         className={`w-full flex items-center p-2 rounded-lg bg-secondary/10 border border-dashed border-border/50 text-muted-foreground text-sm transition-all duration-200 group/slot ${!isReadOnly ? 'cursor-pointer hover:bg-primary/5 hover:border-primary/30 hover:text-primary hover:shadow-sm' : 'cursor-default'}`}
                         onClick={() => !isReadOnly && setIsAssignModalOpen(true)}
-                        disabled={isReadOnly}
+                        disabled={isReadOnly || isPending}
                       >
                         <div className="w-6 h-6 rounded-full bg-secondary/40 flex items-center justify-center mr-2 text-[10px] font-medium group-hover/slot:bg-primary/10 group-hover/slot:text-primary transition-colors">{i + 1}</div>
                         <span className="font-medium">Свободное место</span>
