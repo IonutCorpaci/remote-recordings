@@ -1,10 +1,28 @@
 import { Settings, User, Bell, Shield, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
+import { requireAuth } from "@/features/auth/utils/requireAuth";
+import prisma from "@/lib/prisma";
+import { redirect } from "next/navigation";
+import { ProfileForm } from "@/features/users/components/ProfileForm";
+import { logout } from "@/features/auth/actions/logout";
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const session = await requireAuth();
+  if (!session || !session.userId) {
+    redirect("/login");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.userId as string },
+    select: { name: true, email: true }
+  });
+
+  if (!user) {
+    redirect("/login");
+  }
+
   return (
     <div className="space-y-6 max-w-3xl mx-auto pb-10">
       <div>
@@ -22,18 +40,8 @@ export default function SettingsPage() {
             </CardTitle>
             <CardDescription>Изменить личные данные</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Имя</label>
-                <Input defaultValue="Admin" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Email</label>
-                <Input defaultValue="admin@example.com" type="email" />
-              </div>
-            </div>
-            <Button>Сохранить изменения</Button>
+          <CardContent>
+            <ProfileForm user={user} />
           </CardContent>
         </Card>
 
@@ -46,15 +54,15 @@ export default function SettingsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-3 rounded-lg border border-white/5 bg-background/50">
+            <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-background/50 hover:bg-secondary/50 transition-colors">
               <div className="space-y-0.5">
                 <div className="font-medium text-sm">PWA Установка</div>
                 <div className="text-xs text-muted-foreground">Установить приложение на главный экран</div>
               </div>
-              <Button variant="outline" size="sm">Установить</Button>
+              <Button variant="outline" size="sm" className="cursor-pointer">Установить</Button>
             </div>
             
-            <div className="flex items-center justify-between p-3 rounded-lg border border-white/5 bg-background/50">
+            <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-background/50 hover:bg-secondary/50 transition-colors">
               <div className="space-y-0.5">
                 <div className="font-medium text-sm">Тёмная тема</div>
                 <div className="text-xs text-muted-foreground">Включена по умолчанию</div>
@@ -65,25 +73,25 @@ export default function SettingsPage() {
         </Card>
 
         {/* Безопасность */}
-        <Card className="border-destructive/20">
+        <Card className="border-destructive/20 overflow-hidden relative">
+          <div className="absolute inset-0 bg-destructive/5 pointer-events-none" />
           <CardHeader>
             <CardTitle className="flex items-center text-destructive">
               <Shield className="w-5 h-5 mr-2" />
               Опасная зона
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 relative">
             <p className="text-sm text-muted-foreground">
               Действия в этом разделе не могут быть отменены.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button variant="outline" className="w-full sm:w-auto text-destructive hover:bg-destructive/10 hover:text-destructive">
-                Сменить пароль
-              </Button>
-              <Button variant="destructive" className="w-full sm:w-auto">
-                <LogOut className="w-4 h-4 mr-2" />
-                Выйти со всех устройств
-              </Button>
+              <form action={logout} className="w-full sm:w-auto">
+                <Button variant="destructive" type="submit" className="w-full cursor-pointer">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Выйти со всех устройств
+                </Button>
+              </form>
             </div>
           </CardContent>
         </Card>

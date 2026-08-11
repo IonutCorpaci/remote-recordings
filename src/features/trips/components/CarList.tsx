@@ -7,7 +7,7 @@ import { CarCard } from "./CarCard";
 import { AddCarModal } from "./AddCarModal";
 import { CarWithRelations, Participant } from "../types";
 
-export function CarList({ cars, allParticipants, tripId, isReadOnly = false }: { cars: CarWithRelations[], allParticipants: Participant[], tripId: string, isReadOnly?: boolean }) {
+export function CarList({ cars, allParticipants, unassigned, tripId, isReadOnly = false }: { cars: CarWithRelations[], allParticipants: Participant[], unassigned: Participant[], tripId: string, isReadOnly?: boolean }) {
   const [isAddCarOpen, setIsAddCarOpen] = React.useState(false);
 
   return (
@@ -26,7 +26,7 @@ export function CarList({ cars, allParticipants, tripId, isReadOnly = false }: {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {cars.map((car: CarWithRelations) => (
-              <CarCard key={car.id} car={car} isReadOnly={isReadOnly} />
+              <CarCard key={car.id} car={car} unassigned={unassigned} tripId={tripId} isReadOnly={isReadOnly} />
             ))}
           </div>
 

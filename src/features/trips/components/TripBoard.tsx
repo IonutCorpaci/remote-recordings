@@ -29,8 +29,8 @@ export function TripBoard({ trip, isReadOnly = false }: { trip: TripWithRelation
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 250,
-        tolerance: 5,
+        delay: 150,
+        tolerance: 8,
       },
     })
   );
@@ -88,7 +88,7 @@ export function TripBoard({ trip, isReadOnly = false }: { trip: TripWithRelation
       {/* Board Layout */}
       <div className={`grid grid-cols-1 lg:grid-cols-4 gap-6 transition-opacity ${isPending ? 'opacity-50 pointer-events-none' : ''}`}>
         <UnassignedList unassigned={unassigned} tripId={trip.id} isReadOnly={isReadOnly} />
-        <CarList cars={cars} allParticipants={allParticipants} tripId={trip.id} isReadOnly={isReadOnly} />
+        <CarList cars={cars} allParticipants={allParticipants} unassigned={unassigned} tripId={trip.id} isReadOnly={isReadOnly} />
       </div>
     </div>
   );

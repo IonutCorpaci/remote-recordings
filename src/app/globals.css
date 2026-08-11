@@ -3,38 +3,38 @@
 @theme {
   --font-sans: var(--font-inter), "Inter", "sans-serif";
 
-  --color-background: #09090b; /* Zinc 950 */
-  --color-foreground: #fafafa; /* Zinc 50 */
+  --color-background: oklch(0.13 0.02 260); 
+  --color-foreground: oklch(0.98 0.01 260);
   
-  --color-card: rgba(24, 24, 27, 0.7); /* Zinc 900 with opacity */
-  --color-card-foreground: #fafafa;
+  --color-card: oklch(0.18 0.02 260 / 0.5); 
+  --color-card-foreground: oklch(0.98 0.01 260);
   
-  --color-popover: #18181b;
-  --color-popover-foreground: #fafafa;
+  --color-popover: oklch(0.18 0.02 260);
+  --color-popover-foreground: oklch(0.98 0.01 260);
   
-  --color-primary: #3b82f6; /* Blue 500 */
-  --color-primary-foreground: #ffffff;
+  --color-primary: oklch(0.65 0.16 250); 
+  --color-primary-foreground: oklch(0.98 0 0);
   
-  --color-secondary: #27272a; /* Zinc 800 */
-  --color-secondary-foreground: #fafafa;
+  --color-secondary: oklch(0.22 0.03 260); 
+  --color-secondary-foreground: oklch(0.98 0.01 260);
   
-  --color-muted: #27272a;
-  --color-muted-foreground: #a1a1aa; /* Zinc 400 */
+  --color-muted: oklch(0.2 0.03 260);
+  --color-muted-foreground: oklch(0.65 0.03 260);
   
-  --color-accent: #27272a;
-  --color-accent-foreground: #fafafa;
+  --color-accent: oklch(0.25 0.05 260);
+  --color-accent-foreground: oklch(0.98 0.01 260);
   
-  --color-destructive: #ef4444; /* Red 500 */
-  --color-destructive-foreground: #fafafa;
+  --color-destructive: oklch(0.6 0.2 25);
+  --color-destructive-foreground: oklch(0.98 0 0);
   
-  --color-border: #27272a; /* Zinc 800 */
-  --color-input: #27272a;
-  --color-ring: #3b82f6;
+  --color-border: oklch(0.3 0.03 260 / 0.5);
+  --color-input: oklch(0.25 0.03 260);
+  --color-ring: oklch(0.65 0.16 250 / 0.5);
 
-  --radius-xl: 1rem;
-  --radius-lg: 0.75rem;
-  --radius-md: 0.5rem;
-  --radius-sm: 0.25rem;
+  --radius-xl: 1.25rem;
+  --radius-lg: 1rem;
+  --radius-md: 0.75rem;
+  --radius-sm: 0.5rem;
 }
 
 @layer base {
@@ -45,24 +45,56 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    /* Subtle gradient background for premium feel */
+    /* Vibrant, smooth gradients for a premium feel */
     background-image: 
-      radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.1), transparent 25%),
-      radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.1), transparent 25%);
+      radial-gradient(circle at 10% 0%, oklch(0.65 0.16 250 / 0.15), transparent 40%),
+      radial-gradient(circle at 90% 100%, oklch(0.6 0.2 300 / 0.1), transparent 40%),
+      radial-gradient(circle at 50% 50%, oklch(0.2 0.03 260 / 0.4), transparent 60%);
     background-attachment: fixed;
     min-height: 100vh;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Improve scrollbar for webkit */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-muted);
+    border-radius: var(--radius-sm);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-muted-foreground);
   }
 }
 
 @layer utilities {
   .glass-panel {
     background-color: var(--color-card);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .glass-panel:hover {
+    border-color: oklch(0.4 0.03 260 / 0.8);
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

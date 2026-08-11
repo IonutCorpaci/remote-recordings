@@ -61,37 +61,49 @@ export function UnassignedList({ unassigned, tripId, isReadOnly = false }: { una
           </div>
           <Card 
             ref={setNodeRef}
-            className={`bg-secondary/20 border-dashed border-white/20 h-[calc(100vh-350px)] min-h-[300px] transition-colors ${isOver ? 'bg-secondary/40 border-primary' : ''}`}
+            className={`bg-secondary/20 border-dashed border-white/20 min-h-[150px] lg:max-h-[calc(100vh-200px)] overflow-y-auto transition-colors ${isOver ? 'bg-secondary/40 border-primary' : ''}`}
           >
-            <CardContent className="p-3 space-y-2 pt-3">
-              {unassigned.map((p: Participant) => (
-                <DraggableParticipant 
-                  key={p.id} 
-                  participant={p} 
-                  onRemove={handleRemoveParticipant} 
-                  isPending={isPending} 
-                  isReadOnly={isReadOnly}
-                />
-              ))}
+            <CardContent className="p-3 space-y-3 pt-3">
               {!isReadOnly && (
-                <form onSubmit={handleAddParticipant} className="pt-4 px-1 flex flex-col space-y-2">
-                  <div className="flex space-x-2">
+                <form onSubmit={handleAddParticipant} className="flex flex-col space-y-2 mb-4">
+                  <div className="flex space-x-2 relative group">
                     <Input 
                       value={newParticipantName}
                       onChange={e => setNewParticipantName(e.target.value)}
                       disabled={isPending}
                       placeholder="Добавить участника..." 
-                      className="h-9 text-sm bg-background/80" 
+                      className="h-10 text-sm bg-background/50 border-white/10 group-focus-within:border-primary/50 transition-colors pr-10" 
                     />
-                    <Button type="submit" size="icon" className="w-9 h-9 shrink-0 cursor-pointer" disabled={isPending || !newParticipantName.trim()}>
+                    <Button 
+                      type="submit" 
+                      size="icon" 
+                      variant="ghost"
+                      className="absolute right-0 top-0 h-10 w-10 text-muted-foreground hover:text-primary cursor-pointer" 
+                      disabled={isPending || !newParticipantName.trim()}
+                    >
                       <Plus className="w-4 h-4" />
                     </Button>
                   </div>
                   {fieldErrors.name && (
-                    <p className="text-xs text-red-500 font-medium">{fieldErrors.name[0]}</p>
+                    <p className="text-xs text-red-500 font-medium px-1">{fieldErrors.name[0]}</p>
                   )}
                 </form>
               )}
+              
+              <div className="flex flex-col space-y-2 lg:block lg:space-y-2 gap-2">
+                {unassigned.length === 0 && (
+                   <p className="text-xs text-center text-muted-foreground py-4 lg:py-8">Нет участников</p>
+                )}
+                {unassigned.map((p: Participant) => (
+                  <DraggableParticipant 
+                    key={p.id} 
+                    participant={p} 
+                    onRemove={handleRemoveParticipant} 
+                    isPending={isPending} 
+                    isReadOnly={isReadOnly}
+                  />
+                ))}
+              </div>
             </CardContent>
           </Card>
         </div>

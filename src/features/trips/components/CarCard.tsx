@@ -9,9 +9,11 @@ import removeCar from "@/features/cars/actions/removeCar";
 import { useDroppable } from "@dnd-kit/core";
 import { DraggableParticipant } from "./DraggableParticipant";
 import { toast } from "sonner";
-import { CarWithRelations } from "../types";
+import { CarWithRelations, Participant } from "../types";
 
-export function CarCard({ car, isReadOnly = false }: { car: CarWithRelations, isReadOnly?: boolean }) {
+import { AssignParticipantModal } from "./AssignParticipantModal";
+export function CarCard({ car, unassigned, tripId, isReadOnly = false }: { car: CarWithRelations, unassigned?: Participant[], tripId?: string, isReadOnly?: boolean }) {
+  const [isAssignModalOpen, setIsAssignModalOpen] = React.useState(false);
   const [isPending, startTransition] = React.useTransition();
 
   const { isOver, setNodeRef } = useDroppable({
@@ -29,6 +31,7 @@ export function CarCard({ car, isReadOnly = false }: { car: CarWithRelations, is
   };
 
   return (
+            <React.Fragment>
               <Card 
                 ref={setNodeRef}
                 className={`border-t-4 border-t-primary shadow-sm hover:shadow-md transition-all relative group/car ${isOver ? 'ring-2 ring-primary bg-primary/5' : ''}`}
@@ -78,13 +81,28 @@ export function CarCard({ car, isReadOnly = false }: { car: CarWithRelations, is
                         isReadOnly={isReadOnly}
                       />
                     ) : (
-                      <div key={`empty-${i}`} className="flex items-center p-2 rounded-lg bg-secondary/30 border border-dashed border-white/10 text-muted-foreground text-sm cursor-default transition-colors">
-                        <div className="w-6 h-6 rounded-full bg-background/50 flex items-center justify-center mr-2 text-[10px]">{i + 1}</div>
-                        <span>Свободное место</span>
-                      </div>
+                      <button 
+                        key={`empty-${i}`} 
+                        className={`w-full flex items-center p-2 rounded-lg bg-secondary/10 border border-dashed border-border/50 text-muted-foreground text-sm transition-all duration-200 group/slot ${!isReadOnly ? 'cursor-pointer hover:bg-primary/5 hover:border-primary/30 hover:text-primary hover:shadow-sm' : 'cursor-default'}`}
+                        onClick={() => !isReadOnly && setIsAssignModalOpen(true)}
+                        disabled={isReadOnly}
+                      >
+                        <div className="w-6 h-6 rounded-full bg-secondary/40 flex items-center justify-center mr-2 text-[10px] font-medium group-hover/slot:bg-primary/10 group-hover/slot:text-primary transition-colors">{i + 1}</div>
+                        <span className="font-medium">Свободное место</span>
+                      </button>
                     );
                   })}
                 </CardContent>
               </Card>
+              {!isReadOnly && tripId && unassigned && (
+                <AssignParticipantModal 
+                  isOpen={isAssignModalOpen}
+                  onClose={() => setIsAssignModalOpen(false)}
+                  unassigned={unassigned}
+                  tripId={tripId}
+                  carId={car.id}
+                />
+              )}
+            </React.Fragment>
   );
 }
