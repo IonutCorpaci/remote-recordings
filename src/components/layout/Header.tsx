@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -28,8 +29,15 @@ export function Header() {
     <header className="sticky top-0 z-40 w-full glass-panel border-b border-white/5">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
-          <div className="w-10 h-10 flex items-center justify-center overflow-hidden rounded-md">
-            <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
+          <div className="w-10 h-10 flex items-center justify-center overflow-hidden rounded-md relative">
+            <Image 
+              src="/logo.webp" 
+              alt="Logo" 
+              width={40} 
+              height={40} 
+              priority 
+              className="w-10 h-10 object-contain" 
+            />
           </div>
           <span className="font-bold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
             Remote Recordings

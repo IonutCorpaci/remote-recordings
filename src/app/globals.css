@@ -45,17 +45,25 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    /* Vibrant, smooth gradients for a premium feel */
-    background-image: 
-      radial-gradient(circle at 10% 0%, oklch(0.65 0.16 250 / 0.15), transparent 40%),
-      radial-gradient(circle at 90% 100%, oklch(0.6 0.2 300 / 0.1), transparent 40%),
-      radial-gradient(circle at 50% 50%, oklch(0.2 0.03 260 / 0.4), transparent 60%);
-    background-attachment: fixed;
     min-height: 100vh;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    position: relative;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    /* Vibrant, smooth gradients for a premium feel on dedicated GPU layer */
+    background-image: 
+      radial-gradient(circle at 10% 0%, oklch(0.65 0.16 250 / 0.15), transparent 40%),
+      radial-gradient(circle at 90% 100%, oklch(0.6 0.2 300 / 0.1), transparent 40%),
+      radial-gradient(circle at 50% 50%, oklch(0.2 0.03 260 / 0.4), transparent 60%);
+    transform: translateZ(0);
   }
 
   /* Improve scrollbar for webkit */
@@ -82,7 +90,7 @@
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--color-border);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
   
   .glass-panel:hover {

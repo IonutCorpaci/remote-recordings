@@ -1,11 +1,12 @@
 const CACHE_NAME = 'remote-recordings-v1';
 
 const STATIC_ASSETS = [
-  '/',
-  '/offline.html',
   '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  '/icons/icon-512x512.png',
+  '/logo.webp',
+  '/favicon.ico'
 ];
+
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
