@@ -64,6 +64,7 @@
       radial-gradient(circle at 90% 100%, oklch(0.6 0.2 300 / 0.1), transparent 40%),
       radial-gradient(circle at 50% 50%, oklch(0.2 0.03 260 / 0.4), transparent 60%);
     transform: translateZ(0);
+    will-change: transform;
   }
 
   /* Improve scrollbar for webkit */
