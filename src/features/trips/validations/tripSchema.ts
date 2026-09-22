@@ -6,7 +6,6 @@ export const createUpdateTripSchema = z.object({
     date: z.coerce.date({
         message: "Укажите корректную дату",
     }),
-    notes: z.string().optional()
 });
 
 export type CreateUpdateTripInput = z.infer<typeof createUpdateTripSchema>;

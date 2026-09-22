@@ -66,22 +66,20 @@ export function UnassignedList({ unassigned, tripId, isReadOnly = false }: { una
             <CardContent className="p-3 space-y-3 pt-3">
               {!isReadOnly && (
                 <form onSubmit={handleAddParticipant} className="flex flex-col space-y-2 mb-4">
-                  <div className="flex space-x-2 relative group">
+                  <div className="flex space-x-2 group">
                     <Input 
                       value={newParticipantName}
                       onChange={e => setNewParticipantName(e.target.value)}
                       disabled={isPending}
                       placeholder="Добавить участника..." 
-                      className="h-10 text-sm bg-background/50 border-white/10 group-focus-within:border-primary/50 transition-colors pr-10" 
+                      className="flex-1 bg-background/50 border-white/10 group-focus-within:border-primary/50 transition-colors" 
                     />
                     <Button 
                       type="submit" 
-                      size="icon" 
-                      variant="ghost"
-                      className="absolute right-0 top-0 h-10 w-10 text-muted-foreground hover:text-primary cursor-pointer" 
+                      className="shrink-0 h-12 w-12 shadow-lg shadow-primary/20 cursor-pointer" 
                       disabled={isPending || !newParticipantName.trim()}
                     >
-                      <Plus className="w-4 h-4" />
+                      <Plus className="w-5 h-5" />
                     </Button>
                   </div>
                   {fieldErrors.name && (

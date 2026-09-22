@@ -49,7 +49,7 @@ export default async function DashboardPage() {
           <h1 className="text-3xl font-bold tracking-tight">Мои поездки</h1>
           <p className="text-muted-foreground mt-1">Управляйте еженедельными выездами</p>
         </div>
-        <Button asChild className="hidden sm:flex shadow-lg shadow-primary/20">
+        <Button asChild className="flex shadow-lg shadow-primary/20">
           <Link href="/trips/new">
             <Plus className="w-4 h-4 mr-2" />
             Создать
@@ -58,7 +58,21 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {!trips?.length ? <div>Нет поездок</div> :
+        {!trips?.length ? (
+          <div className="col-span-full flex flex-col items-center justify-center py-16 text-center bg-card/30 rounded-2xl border border-white/10 border-dashed">
+            <div className="w-16 h-16 bg-primary/20 text-primary rounded-full flex items-center justify-center mb-4">
+              <CarIcon className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">У вас еще нет поездок</h3>
+            <p className="text-muted-foreground mb-6 max-w-sm">Создайте свою первую поездку, чтобы начать распределять пассажиров по машинам.</p>
+            <Button asChild size="lg" className="shadow-lg shadow-primary/20">
+              <Link href="/trips/new">
+                <Plus className="w-5 h-5 mr-2" />
+                Создать первую поездку
+              </Link>
+            </Button>
+          </div>
+        ) :
           trips.map((trip) => (
             <Card key={trip.id} className="flex flex-col hover:border-primary/50 transition-colors group">
               <CardHeader className="pb-3">

@@ -55,27 +55,20 @@ export default function NewTripPage() {
                 <label className="text-sm font-medium leading-none" htmlFor="date">
                   Дата
                 </label>
-                <Input id="date" name="date" type="date" />
+                <Input 
+                  id="date" 
+                  name="date" 
+                  type="date" 
+                  min={new Date().toISOString().split('T')[0]} 
+                  className="w-full text-left"
+                />
                 {state?.fieldErrors?.date && (
                   <p className="text-sm text-red-500 font-medium">{state.fieldErrors.date[0]}</p>
                 )}
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium leading-none" htmlFor="notes">
-                Заметки (опционально)
-              </label>
-              <textarea
-                id="notes"
-                className="flex min-h-[100px] w-full rounded-lg border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors backdrop-blur-sm resize-none"
-                placeholder="Детали поездки, место сбора..."
-                name="notes"
-              />
-              {state?.fieldErrors?.notes && (
-                <p className="text-sm text-red-500 font-medium">{state.fieldErrors.notes[0]}</p>
-              )}
-            </div>
+
           </CardContent>
           <CardFooter className="flex justify-between items-center border-t border-white/5 pt-6">
             <div className="text-sm font-medium text-red-500">

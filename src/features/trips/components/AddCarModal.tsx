@@ -12,7 +12,6 @@ export function AddCarModal({ isOpen, onClose, allParticipants, tripId }: { isOp
   const [isPending, startTransition] = React.useTransition();
   const [driverId, setDriverId] = React.useState("");
   const [newDriverName, setNewDriverName] = React.useState("");
-  const [carModel, setCarModel] = React.useState("");
   const [totalSeats, setTotalSeats] = React.useState("4");
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string[]>>({});
 
@@ -30,7 +29,7 @@ export function AddCarModal({ isOpen, onClose, allParticipants, tripId }: { isOp
         tripId,
         driverId || null,
         newDriverName.trim() || null,
-        carModel.trim() || null,
+        null, // carModel is no longer used but the server action might still accept it. We pass null.
         parseInt(totalSeats) || 4
       );
 
@@ -42,7 +41,6 @@ export function AddCarModal({ isOpen, onClose, allParticipants, tripId }: { isOp
       } else {
         setDriverId("");
         setNewDriverName("");
-        setCarModel("");
         setTotalSeats("4");
         toast.success("Машина добавлена");
         onClose();
@@ -68,7 +66,7 @@ export function AddCarModal({ isOpen, onClose, allParticipants, tripId }: { isOp
                   if (e.target.value) setNewDriverName("");
                 }}
                 disabled={isPending}
-                className="flex h-12 w-full rounded-lg border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors cursor-pointer disabled:opacity-50"
+                className="flex h-12 w-full rounded-lg border border-input bg-background/50 px-3 py-2 text-base md:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors cursor-pointer disabled:opacity-50"
               >
                 <option value="">Выберите из списка участников...</option>
                 {allParticipants.map((p: Participant) => (
@@ -94,19 +92,8 @@ export function AddCarModal({ isOpen, onClose, allParticipants, tripId }: { isOp
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold">Модель авто</label>
-              <Input 
-                placeholder="Опционально" 
-                value={carModel}
-                onChange={e => setCarModel(e.target.value)}
-                disabled={isPending}
-              />
-              {fieldErrors.carModel && (
-                <p className="text-xs text-red-500 font-medium">{fieldErrors.carModel[0]}</p>
-              )}
-            </div>
+          <div className="grid grid-cols-1 gap-4">
+
             <div className="space-y-2">
               <label className="text-sm font-semibold">Всего мест</label>
               <Input 
