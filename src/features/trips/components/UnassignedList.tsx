@@ -79,7 +79,7 @@ export function UnassignedList({ unassigned, tripId, isReadOnly = false }: { una
                       className="shrink-0 h-10 w-10 shadow-lg shadow-primary/20 cursor-pointer" 
                       disabled={isPending || !newParticipantName.trim()}
                     >
-                      <Plus className="w-4 h-4" />
+                      <Plus className="w-5 h-5" />
                     </Button>
                   </div>
                   {fieldErrors.name && (
