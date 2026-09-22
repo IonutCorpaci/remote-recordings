@@ -11,7 +11,7 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "default", size = "default", asChild = false, ...props }, ref) => {
-    
+
     // Manual variant implementation
     const variants = {
       default: "bg-primary text-primary-foreground hover:bg-primary/90",
@@ -21,9 +21,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       ghost: "hover:bg-accent hover:text-accent-foreground",
       link: "text-primary underline-offset-4 hover:underline",
     }
-    
+
     const sizes = {
-      default: "h-11 px-4 py-2",
+      default: "h-11 px-2 py-2",
       sm: "h-9 rounded-md px-3",
       lg: "h-12 rounded-lg px-8 text-lg",
       icon: "h-11 w-11",
