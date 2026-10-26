@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru" suppressHydrationWarning>
-      <body suppressHydrationWarning className={`${inter.variable} antialiased pb-20 md:pb-0`}>
+      <body suppressHydrationWarning className={`${inter.variable} antialiased pb-24 md:pb-0 min-h-screen`}>
         {children}
         <Toaster position="top-center" richColors theme="dark" />
         <ServiceWorkerRegister />

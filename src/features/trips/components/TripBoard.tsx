@@ -5,13 +5,39 @@ import { TripHeader } from "./TripHeader";
 import { TripStats } from "./TripStats";
 import { UnassignedList } from "./UnassignedList";
 import { CarList } from "./CarList";
-import { DndContext, DragEndEvent, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
+import {
+  DndContext,
+  DragEndEvent,
+  DragStartEvent,
+  MouseSensor,
+  TouchSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+} from "@dnd-kit/core";
+import { ParticipantDragOverlay } from "./DraggableParticipant";
+import { AllParticipantsModal } from "./AllParticipantsModal";
+import { PairModal } from "@/features/participants/components/PairModal";
+import { QuickMoveModal } from "./QuickMoveModal";
 import assignParticipant from "@/features/participants/actions/assignParticipant";
 import { toast } from "sonner";
 import { TripWithRelations, CarWithRelations, Participant } from "../types";
 
-export function TripBoard({ trip, isReadOnly = false }: { trip: TripWithRelations, isReadOnly?: boolean }) {
-  const [isPending, startTransition] = React.useTransition();
+export function TripBoard({
+  trip,
+  isReadOnly = false,
+}: {
+  trip: TripWithRelations;
+  isReadOnly?: boolean;
+}) {
+  const [, startTransition] = React.useTransition();
+  const [activeParticipant, setActiveParticipant] = React.useState<Participant | null>(null);
+
+  // Modals state
+  const [isAllParticipantsModalOpen, setIsAllParticipantsModalOpen] = React.useState(false);
+  const [pairParticipantTarget, setPairParticipantTarget] = React.useState<Participant | null>(null);
+  const [quickMoveParticipantTarget, setQuickMoveParticipantTarget] = React.useState<Participant | null>(null);
 
   const [optimisticTrip, setOptimisticTrip] = React.useOptimistic(
     trip,
@@ -51,26 +77,47 @@ export function TripBoard({ trip, isReadOnly = false }: { trip: TripWithRelation
   // Вычисляем данные из оптимистичного состояния
   const cars = optimisticTrip.cars || [];
   const driverIds = new Set(cars.map((c: CarWithRelations) => c.driverId));
-  const unassigned = (optimisticTrip.participants || []).filter((p: Participant) => !p.carId && !driverIds.has(p.id));
+  const unassigned = (optimisticTrip.participants || []).filter(
+    (p: Participant) => !p.carId && !driverIds.has(p.id)
+  );
   const allParticipants = optimisticTrip.participants || [];
 
-  const emptySeatsCount = cars.reduce((acc: number, c: CarWithRelations) => acc + (c.totalSeats - 1 - (c.passengers?.length || 0)), 0);
+  const emptySeatsCount = cars.reduce(
+    (acc: number, c: CarWithRelations) =>
+      acc + (c.totalSeats - 1 - (c.passengers?.length || 0)),
+    0
+  );
 
+  // Сенсоры: мышь для ПК, тач с 200мс задержкой для мобилок (чтобы не ломать скролл страницы)
   const sensors = useSensors(
-    useSensor(PointerSensor, {
+    useSensor(MouseSensor, {
       activationConstraint: {
-        distance: 5,
+        distance: 8,
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 150,
-        tolerance: 8,
+        delay: 200,
+        tolerance: 6,
       },
-    })
+    }),
+    useSensor(KeyboardSensor)
   );
 
+  const handleDragStart = (event: DragStartEvent) => {
+    if (isReadOnly) return;
+    const participant = allParticipants.find((p: Participant) => p.id === event.active.id);
+    if (participant) {
+      setActiveParticipant(participant);
+    }
+  };
+
+  const handleDragCancel = () => {
+    setActiveParticipant(null);
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
+    setActiveParticipant(null);
     if (isReadOnly) return;
     const { active, over } = event;
     if (!over) return;
@@ -82,7 +129,7 @@ export function TripBoard({ trip, isReadOnly = false }: { trip: TripWithRelation
     if (!participant) return;
 
     let targetCarId: string | null = null;
-    
+
     if (dropZoneId === "unassigned") {
       targetCarId = null;
     } else {
@@ -90,15 +137,15 @@ export function TripBoard({ trip, isReadOnly = false }: { trip: TripWithRelation
     }
 
     if (participant.carId === targetCarId) return;
-    
+
     if (targetCarId) {
       const targetCar = cars.find((c: CarWithRelations) => c.id === targetCarId);
       if (targetCar) {
-         const passengerCapacity = targetCar.totalSeats - 1;
-         if (targetCar.passengers.length >= passengerCapacity) {
-             toast.error("В этой машине больше нет свободных мест!");
-             return;
-         }
+        const passengerCapacity = targetCar.totalSeats - 1;
+        if (targetCar.passengers.length >= passengerCapacity) {
+          toast.error("В этой машине больше нет свободных мест!");
+          return;
+        }
       }
     }
 
@@ -119,13 +166,63 @@ export function TripBoard({ trip, isReadOnly = false }: { trip: TripWithRelation
         cars={cars}
         unassigned={unassigned}
         emptySeatsCount={emptySeatsCount}
+        onOpenAllParticipants={() => setIsAllParticipantsModalOpen(true)}
       />
 
       {/* Board Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <UnassignedList unassigned={unassigned} tripId={trip.id} isReadOnly={isReadOnly} />
-        <CarList cars={cars} allParticipants={allParticipants} unassigned={unassigned} tripId={trip.id} isReadOnly={isReadOnly} />
+        <UnassignedList
+          unassigned={unassigned}
+          tripId={trip.id}
+          isReadOnly={isReadOnly}
+          onOpenPairModal={(p) => setPairParticipantTarget(p)}
+          onOpenQuickMoveModal={(p) => setQuickMoveParticipantTarget(p)}
+        />
+        <CarList
+          cars={cars}
+          allParticipants={allParticipants}
+          unassigned={unassigned}
+          tripId={trip.id}
+          isReadOnly={isReadOnly}
+          onOpenPairModal={(p) => setPairParticipantTarget(p)}
+          onOpenQuickMoveModal={(p) => setQuickMoveParticipantTarget(p)}
+        />
       </div>
+
+      {/* Modals */}
+      <AllParticipantsModal
+        isOpen={isAllParticipantsModalOpen}
+        onClose={() => setIsAllParticipantsModalOpen(false)}
+        allParticipants={allParticipants}
+        cars={cars}
+        tripId={trip.id}
+        isReadOnly={isReadOnly}
+        onOpenPairModal={(p) => {
+          setIsAllParticipantsModalOpen(false);
+          setPairParticipantTarget(p);
+        }}
+        onOpenQuickMoveModal={(p) => {
+          setIsAllParticipantsModalOpen(false);
+          setQuickMoveParticipantTarget(p);
+        }}
+      />
+
+      <PairModal
+        isOpen={Boolean(pairParticipantTarget)}
+        onClose={() => setPairParticipantTarget(null)}
+        participant={pairParticipantTarget}
+        allParticipants={allParticipants}
+        cars={cars}
+        tripId={trip.id}
+      />
+
+      <QuickMoveModal
+        isOpen={Boolean(quickMoveParticipantTarget)}
+        onClose={() => setQuickMoveParticipantTarget(null)}
+        participant={quickMoveParticipantTarget}
+        cars={cars}
+        tripId={trip.id}
+      />
     </div>
   );
 
@@ -134,8 +231,18 @@ export function TripBoard({ trip, isReadOnly = false }: { trip: TripWithRelation
   }
 
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
       {BoardContent}
+      <DragOverlay dropAnimation={{ duration: 150, easing: "ease" }}>
+        {activeParticipant ? (
+          <ParticipantDragOverlay participant={activeParticipant} />
+        ) : null}
+      </DragOverlay>
     </DndContext>
   );
 }

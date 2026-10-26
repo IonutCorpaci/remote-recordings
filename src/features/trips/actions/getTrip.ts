@@ -11,11 +11,23 @@ export default async function getTrip(id: string) {
         const trip = await prisma.trip.findUnique({
             where: { id: id },
             include: {
-                participants: true,
+                participants: {
+                    include: {
+                        partner: true
+                    }
+                },
                 cars: {
                     include: {
-                        driver: true,
-                        passengers: true
+                        driver: {
+                            include: {
+                                partner: true
+                            }
+                        },
+                        passengers: {
+                            include: {
+                                partner: true
+                            }
+                        }
                     }
                 }
             }

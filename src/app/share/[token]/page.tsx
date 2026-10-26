@@ -8,14 +8,26 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
   const trip = await prisma.trip.findUnique({
     where: { shareToken: token },
     include: {
-      participants: true,
+      participants: {
+        include: {
+          partner: true,
+        },
+      },
       cars: {
         include: {
-          driver: true,
-          passengers: true
-        }
-      }
-    }
+          driver: {
+            include: {
+              partner: true,
+            },
+          },
+          passengers: {
+            include: {
+              partner: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   if (!trip) {

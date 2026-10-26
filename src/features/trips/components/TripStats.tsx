@@ -1,22 +1,53 @@
 import * as React from "react";
-import { Users, Car, MapPin, CheckCircle } from "lucide-react";
+import { Users, Car } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/Card";
 import { TripWithRelations, CarWithRelations, Participant } from "../types";
 
-export function TripStats({ trip, cars, unassigned, emptySeatsCount }: { trip: TripWithRelations, cars: CarWithRelations[], unassigned: Participant[], emptySeatsCount: number }) {
+interface TripStatsProps {
+  trip: TripWithRelations;
+  cars: CarWithRelations[];
+  unassigned: Participant[];
+  emptySeatsCount: number;
+  onOpenAllParticipants?: () => void;
+}
+
+export function TripStats({
+  trip,
+  cars,
+  unassigned,
+  emptySeatsCount,
+  onOpenAllParticipants,
+}: TripStatsProps) {
   return (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 pb-2">
-        <Card className="bg-primary/5 border-primary/20 transition-all hover:bg-primary/10 cursor-default">
-          <CardContent className="p-3 flex items-center space-x-3">
-            <div className="p-2 rounded-full bg-primary/20">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 pb-2">
+      <Card
+        onClick={onOpenAllParticipants}
+        className={`bg-primary/5 border-primary/20 transition-all ${
+          onOpenAllParticipants
+            ? "cursor-pointer hover:bg-primary/15 hover:border-primary/50 active:scale-[0.98] group"
+            : "cursor-default"
+        }`}
+        title={onOpenAllParticipants ? "Посмотреть всех участников" : undefined}
+      >
+        <CardContent className="p-3 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 rounded-full bg-primary/20 group-hover:bg-primary/30 transition-colors">
               <Users className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground font-medium">Людей</p>
+              <p className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                Людей
+                {onOpenAllParticipants && (
+                  <span className="text-[10px] text-primary underline underline-offset-2 opacity-80 group-hover:opacity-100">
+                    список
+                  </span>
+                )}
+              </p>
               <p className="text-lg font-bold leading-tight">{trip.participants?.length || 0}</p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
+      </Card>
         <Card className="bg-purple-500/5 border-purple-500/20 transition-all hover:bg-purple-500/10 cursor-default">
           <CardContent className="p-3 flex items-center space-x-3">
             <div className="p-2 rounded-full bg-purple-500/20">

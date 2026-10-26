@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Car, Map, PlusCircle, Settings } from "lucide-react";
+import { Map, PlusCircle, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function MobileNav() {
@@ -15,10 +15,12 @@ export function MobileNav() {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-panel border-t border-white/5 rounded-t-2xl">
-      <nav className="flex justify-around items-center h-20 pb-4">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-panel border-t border-white/10 rounded-t-2xl">
+      <nav className="flex justify-around items-center h-[calc(4rem+env(safe-area-inset-bottom,0px))] pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]">
         {links.map((link) => {
-          const isActive = pathname === link.href || pathname?.startsWith(`${link.href}/`);
+          const isActive = link.href === "/" 
+            ? pathname === "/" 
+            : pathname === link.href || pathname?.startsWith(`${link.href}/`);
           const Icon = link.icon;
           
           return (

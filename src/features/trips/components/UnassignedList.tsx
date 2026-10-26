@@ -13,7 +13,21 @@ import { DraggableParticipant } from "./DraggableParticipant";
 import { toast } from "sonner";
 import { Participant } from "../types";
 
-export function UnassignedList({ unassigned, tripId, isReadOnly = false }: { unassigned: Participant[], tripId: string, isReadOnly?: boolean }) {
+interface UnassignedListProps {
+  unassigned: Participant[];
+  tripId: string;
+  isReadOnly?: boolean;
+  onOpenPairModal?: (participant: Participant) => void;
+  onOpenQuickMoveModal?: (participant: Participant) => void;
+}
+
+export function UnassignedList({
+  unassigned,
+  tripId,
+  isReadOnly = false,
+  onOpenPairModal,
+  onOpenQuickMoveModal,
+}: UnassignedListProps) {
   const [isPending, startTransition] = React.useTransition();
   const [newParticipantName, setNewParticipantName] = React.useState("");
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string[]>>({});
@@ -27,7 +41,7 @@ export function UnassignedList({ unassigned, tripId, isReadOnly = false }: { una
     e.preventDefault();
     setFieldErrors({});
     if (!newParticipantName.trim()) return;
-    
+
     startTransition(async () => {
       const result = await addParticipant(tripId, newParticipantName.trim());
       if (result?.error) {
@@ -52,58 +66,68 @@ export function UnassignedList({ unassigned, tripId, isReadOnly = false }: { una
   };
 
   return (
-        <div className="lg:col-span-1 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-lg flex items-center">
-              Не распределены
-              <Badge variant="secondary" className="ml-2">{unassigned.length}</Badge>
-            </h3>
-          </div>
-          <Card 
-            ref={setNodeRef}
-            className={`bg-secondary/20 border-dashed border-white/20 min-h-[150px] lg:max-h-[calc(100vh-200px)] overflow-y-auto transition-colors ${isOver ? 'bg-secondary/40 border-primary' : ''}`}
-          >
-            <CardContent className="p-3 space-y-3 pt-3">
-              {!isReadOnly && (
-                <form onSubmit={handleAddParticipant} className="flex flex-col space-y-2 mb-4">
-                  <div className="flex space-x-2 group items-center">
-                    <Input 
-                      value={newParticipantName}
-                      onChange={e => setNewParticipantName(e.target.value)}
-                      disabled={isPending}
-                      placeholder="Добавить участника..." 
-                      className="flex-1 bg-background/50 border-white/10 group-focus-within:border-primary/50 transition-colors" 
-                    />
-                    <Button 
-                      type="submit" 
-                      className="shrink-0 h-10 w-10 shadow-lg shadow-primary/20 cursor-pointer" 
-                      disabled={isPending || !newParticipantName.trim()}
-                    >
-                      <Plus className="w-5 h-5" />
-                    </Button>
-                  </div>
-                  {fieldErrors.name && (
-                    <p className="text-xs text-red-500 font-medium px-1">{fieldErrors.name[0]}</p>
-                  )}
-                </form>
-              )}
-              
-              <div className="flex flex-col space-y-2 lg:block lg:space-y-2 gap-2">
-                {unassigned.length === 0 && (
-                   <p className="text-xs text-center text-muted-foreground py-4 lg:py-8">Нет участников</p>
-                )}
-                {unassigned.map((p: Participant) => (
-                  <DraggableParticipant 
-                    key={p.id} 
-                    participant={p} 
-                    onRemove={handleRemoveParticipant} 
-                    isPending={isPending} 
-                    isReadOnly={isReadOnly}
-                  />
-                ))}
+    <div className="lg:col-span-1 space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-lg flex items-center">
+          Не распределены
+          <Badge variant="secondary" className="ml-2">
+            {unassigned.length}
+          </Badge>
+        </h3>
+      </div>
+      <Card
+        ref={setNodeRef}
+        className={`bg-secondary/20 border-dashed border-white/20 min-h-[150px] lg:max-h-[calc(100vh-200px)] overflow-y-auto transition-colors ${
+          isOver ? "bg-secondary/40 border-primary" : ""
+        }`}
+      >
+        <CardContent className="p-3 space-y-3 pt-3">
+          {!isReadOnly && (
+            <form onSubmit={handleAddParticipant} className="flex flex-col space-y-2 mb-4">
+              <div className="flex space-x-2 group items-center">
+                <Input
+                  value={newParticipantName}
+                  onChange={(e) => setNewParticipantName(e.target.value)}
+                  disabled={isPending}
+                  placeholder="Добавить участника..."
+                  className="flex-1 bg-background/50 border-white/10 group-focus-within:border-primary/50 transition-colors"
+                />
+                <Button
+                  type="submit"
+                  className="shrink-0 h-10 w-10 shadow-lg shadow-primary/20 cursor-pointer"
+                  disabled={isPending || !newParticipantName.trim()}
+                >
+                  <Plus className="w-5 h-5" />
+                </Button>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+              {fieldErrors.name && (
+                <p className="text-xs text-red-500 font-medium px-1">
+                  {fieldErrors.name[0]}
+                </p>
+              )}
+            </form>
+          )}
+
+          <div className="flex flex-col space-y-2 lg:block lg:space-y-2 gap-2">
+            {unassigned.length === 0 && (
+              <p className="text-xs text-center text-muted-foreground py-4 lg:py-8">
+                Нет участников
+              </p>
+            )}
+            {unassigned.map((p: Participant) => (
+              <DraggableParticipant
+                key={p.id}
+                participant={p}
+                onRemove={handleRemoveParticipant}
+                onOpenPairModal={onOpenPairModal}
+                onOpenQuickMoveModal={onOpenQuickMoveModal}
+                isPending={isPending}
+                isReadOnly={isReadOnly}
+              />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

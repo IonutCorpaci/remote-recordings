@@ -1,22 +1,47 @@
 import { Prisma } from "@/generated/prisma/client";
 
+export type Participant = Prisma.ParticipantGetPayload<{
+  include: {
+    partner: true;
+  };
+}>;
+
 export type TripWithRelations = Prisma.TripGetPayload<{
   include: {
-    participants: true;
+    participants: {
+      include: {
+        partner: true;
+      };
+    };
     cars: {
       include: {
-        driver: true;
-        passengers: true;
-      }
-    }
-  }
+        driver: {
+          include: {
+            partner: true;
+          };
+        };
+        passengers: {
+          include: {
+            partner: true;
+          };
+        };
+      };
+    };
+  };
 }>;
 
 export type CarWithRelations = Prisma.CarGetPayload<{
   include: {
-    driver: true;
-    passengers: true;
-  }
+    driver: {
+      include: {
+        partner: true;
+      };
+    };
+    passengers: {
+      include: {
+        partner: true;
+      };
+    };
+  };
 }>;
 
-export type Participant = Prisma.ParticipantGetPayload<Prisma.ParticipantDefaultArgs>;

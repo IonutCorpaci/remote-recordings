@@ -8,8 +8,14 @@ export default async function removeParticipant(id: string, tripId: string) {
     await requireAuth();
 
     try {
-        await prisma.participant.delete({
-            where: { id }
+        await prisma.$transaction(async (tx) => {
+            await tx.participant.updateMany({
+                where: { partnerId: id },
+                data: { partnerId: null }
+            });
+            await tx.participant.delete({
+                where: { id }
+            });
         });
     } catch (error) {
         return { error: "Не удалось удалить участника" };

@@ -74,6 +74,10 @@ model Participant {
 
   ownedCar  Car?     @relation("CarDriver")
 
+  partnerId String?
+  partner   Participant?  @relation("ParticipantPair", fields: [partnerId], references: [id], onDelete: SetNull)
+  pairedBy  Participant[] @relation("ParticipantPair")
+
   createdAt DateTime @default(now())
 }
 

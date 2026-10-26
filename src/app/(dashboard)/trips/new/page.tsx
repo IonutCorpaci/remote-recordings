@@ -33,7 +33,7 @@ export default function NewTripPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none" htmlFor="title">
-                Название (например: "Выходные в горах")
+                Название (например: &laquo;Выходные в горах&raquo;)
               </label>
               <Input id="title" name="title" placeholder="Введите название..." />
               {state?.fieldErrors?.title && (

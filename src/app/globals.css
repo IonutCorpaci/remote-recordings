@@ -44,27 +44,34 @@
 
   body {
     background-color: var(--color-background);
+    background-image: 
+      radial-gradient(circle at 10% 0%, oklch(0.65 0.16 250 / 0.08), transparent 45%),
+      radial-gradient(circle at 90% 100%, oklch(0.6 0.2 300 / 0.06), transparent 45%);
+    background-attachment: fixed;
     color: var(--color-foreground);
     min-height: 100vh;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    position: relative;
   }
 
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    /* Vibrant, smooth gradients for a premium feel on dedicated GPU layer */
-    background-image: 
-      radial-gradient(circle at 10% 0%, oklch(0.65 0.16 250 / 0.15), transparent 40%),
-      radial-gradient(circle at 90% 100%, oklch(0.6 0.2 300 / 0.1), transparent 40%),
-      radial-gradient(circle at 50% 50%, oklch(0.2 0.03 260 / 0.4), transparent 60%);
-    transform: translateZ(0);
-    will-change: transform;
+  /* Date input cross-browser & mobile styling */
+  input[type="date"] {
+    color-scheme: dark;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  input[type="date"]::-webkit-date-and-time-value {
+    text-align: left;
+    min-height: 1.5em;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.8;
+    cursor: pointer;
+    padding-left: 8px;
   }
 
   /* Improve scrollbar for webkit */
@@ -86,17 +93,17 @@
 
 @layer utilities {
   .glass-panel {
-    background-color: var(--color-card);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background-color: oklch(0.18 0.02 260 / 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--color-border);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.25);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
   
   .glass-panel:hover {
     border-color: oklch(0.4 0.03 260 / 0.8);
-    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 30px 0 rgba(0, 0, 0, 0.35);
   }
 
   .hide-scrollbar::-webkit-scrollbar {
