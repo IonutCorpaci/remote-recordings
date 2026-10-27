@@ -5,7 +5,16 @@ import { TripBoard } from "@/features/trips/components/TripBoard";
 export default async function SharePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
 
-  let trip = null;
+  // 1. Попытка автоматического добавления partnerId
+  try {
+    await prisma.$executeRawUnsafe(`ALTER TABLE "Participant" ADD COLUMN IF NOT EXISTS "partnerId" TEXT;`);
+  } catch {
+    // ignore
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let trip: any = null;
+
   try {
     trip = await prisma.trip.findUnique({
       where: { shareToken: token },
@@ -34,18 +43,53 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
   } catch (error) {
     console.error("Ошибка при получении share trip со связями:", error);
     try {
-      trip = await prisma.trip.findUnique({
+      const baseParticipantFields = {
+        id: true,
+        name: true,
+        phone: true,
+        tripId: true,
+        carId: true,
+        createdAt: true,
+      };
+
+      const fallbackTrip = await prisma.trip.findUnique({
         where: { shareToken: token },
         include: {
-          participants: true,
+          participants: {
+            select: baseParticipantFields,
+          },
           cars: {
             include: {
-              driver: true,
-              passengers: true,
+              driver: {
+                select: baseParticipantFields,
+              },
+              passengers: {
+                select: baseParticipantFields,
+              },
             },
           },
         },
       });
+
+      if (fallbackTrip) {
+        trip = {
+          ...fallbackTrip,
+          participants: (fallbackTrip.participants || []).map((p) => ({
+            ...p,
+            partnerId: null,
+            partner: null,
+          })),
+          cars: (fallbackTrip.cars || []).map((c) => ({
+            ...c,
+            driver: c.driver ? { ...c.driver, partnerId: null, partner: null } : null,
+            passengers: (c.passengers || []).map((p) => ({
+              ...p,
+              partnerId: null,
+              partner: null,
+            })),
+          })),
+        };
+      }
     } catch (fallbackError) {
       console.error("Ошибка fallback share trip:", fallbackError);
     }
@@ -57,8 +101,7 @@ export default async function SharePage({ params }: { params: Promise<{ token: s
 
   return (
     <main className="container mx-auto p-4 sm:p-6 min-h-screen">
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <TripBoard trip={trip as any} isReadOnly={true} />
+      <TripBoard trip={trip} isReadOnly={true} />
     </main>
   );
 }

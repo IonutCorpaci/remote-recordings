@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/Card";
 import { useActionState, useEffect, useState } from "react";
 import updateTrip from "@/features/trips/actions/updateTrip";
+import getTrip from "@/features/trips/actions/getTrip";
 import { useParams, useRouter } from "next/navigation";
 import { Trip } from "@/generated/prisma/client";
 import { toast } from "sonner";
@@ -21,11 +22,11 @@ export default function EditTripPage() {
   const [state, formAction, isPending] = useActionState(updateTripWithId, null);
 
   useEffect(() => {
-    // Fetch trip data
-    fetch(`/api/trips/${params.id}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.trip) setTrip(data.trip);
+    if (!params.id) return;
+    getTrip(params.id as string)
+      .then(res => {
+        if (res.data) setTrip(res.data as unknown as Trip);
+        else toast.error("Не удалось загрузить поездку");
       })
       .catch(() => toast.error("Не удалось загрузить поездку"));
   }, [params.id]);
