@@ -61,7 +61,11 @@ export default async function pairParticipants(participantId: string, partnerId:
         revalidatePath(`/trips/${tripId}`);
         return { success: true };
     } catch (error: unknown) {
+        console.error("Ошибка при связывании участников в пару:", error);
         if (error instanceof Error) {
+            if (error.message.includes("partnerId") || error.message.includes("column")) {
+                return { error: "В базе данных отсутствует колонка partnerId. Примените схему: npx prisma db push" };
+            }
             return { error: error.message };
         }
         return { error: "Не удалось связать участников в пару" };

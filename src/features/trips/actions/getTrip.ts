@@ -7,7 +7,6 @@ export default async function getTrip(id: string) {
     await requireAuth();
 
     try {
-
         const trip = await prisma.trip.findUnique({
             where: { id: id },
             include: {
@@ -31,13 +30,36 @@ export default async function getTrip(id: string) {
                     }
                 }
             }
-        })
+        });
 
         if (!trip) return { error: "Поездка не найдена" };
+        return { data: trip };
 
-        return { data: trip }
+    } catch (error: unknown) {
+        console.error("Ошибка при получении поездки со связями пар:", error);
 
-    } catch (error) {
-        return { error: "Не удалось загрузить поездку" }
+        // Fallback: если база данных еще не обновлена (нет колонки partnerId),
+        // загружаем поездку без вложенных пар, чтобы страница открывалась без падений
+        try {
+            const fallbackTrip = await prisma.trip.findUnique({
+                where: { id: id },
+                include: {
+                    participants: true,
+                    cars: {
+                        include: {
+                            driver: true,
+                            passengers: true
+                        }
+                    }
+                }
+            });
+
+            if (!fallbackTrip) return { error: "Поездка не найдена" };
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return { data: fallbackTrip as any };
+        } catch (fallbackError) {
+            console.error("Критическая ошибка загрузки поездки:", fallbackError);
+            return { error: "Не удалось загрузить поездку" };
+        }
     }
 }

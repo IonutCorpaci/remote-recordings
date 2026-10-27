@@ -38,6 +38,7 @@ export default async function unpairParticipant(participantId: string, tripId: s
         revalidatePath(`/trips/${tripId}`);
         return { success: true };
     } catch (error: unknown) {
+        console.error("Ошибка при разъединении пары:", error);
         if (error instanceof Error) {
             return { error: error.message };
         }
